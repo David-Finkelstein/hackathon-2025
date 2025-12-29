@@ -1,0 +1,8 @@
+
+{
+  "name": "Guesty Guard",
+  "description": "AI-powered property inspection tool that detects damages and missing items by comparing post-stay photos with baseline images.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
