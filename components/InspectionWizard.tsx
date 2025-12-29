@@ -70,19 +70,24 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
 
   if (isAnalyzing) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 h-[70vh] text-center space-y-6">
-        <div className="w-24 h-24 border-8 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-slate-800">Analyzing All Rooms...</h2>
-          <p className="text-slate-500">AI is comparing baseline and current photos for damages and missing items.</p>
+      <div className="flex flex-col items-center justify-center p-8 h-[70vh] text-center space-y-6 relative">
+        <div className="absolute top-8 left-8 text-3xl opacity-20 animate-pulse">🎄</div>
+        <div className="absolute top-8 right-8 text-3xl opacity-20 animate-pulse" style={{ animationDelay: '0.5s' }}>⛄</div>
+        <div className="absolute bottom-8 left-1/4 text-2xl opacity-20 animate-pulse" style={{ animationDelay: '0.3s' }}>❄️</div>
+        <div className="absolute bottom-8 right-1/4 text-2xl opacity-20 animate-pulse" style={{ animationDelay: '0.7s' }}>🎅</div>
+        
+        <div className="w-24 h-24 border-8 border-[#007A67]/30 border-t-[#54A18A] rounded-full animate-spin relative z-10"></div>
+        <div className="space-y-2 relative z-10">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-[#54A18A] to-[#007A67] bg-clip-text text-transparent">🎁 Analyzing All Rooms... 🎁</h2>
+          <p className="text-slate-600">AI is comparing baseline and current photos for damages and missing items.</p>
         </div>
-        <div className="bg-slate-50 p-4 rounded-xl w-full text-left">
+        <div className="bg-gradient-to-br from-blue-50 to-teal-50 p-4 rounded-xl w-full text-left border border-[#54A18A]/20 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-4 h-4 rounded-full bg-green-500"></div>
+            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-[#10B981] to-[#059669]"></div>
             <span className="text-sm font-medium text-slate-700">Uploading images</span>
           </div>
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-4 h-4 rounded-full bg-blue-500 animate-pulse"></div>
+            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-[#54A18A] to-[#007A67] animate-pulse"></div>
             <span className="text-sm font-medium text-slate-700">Analyzing 4 rooms for damages</span>
           </div>
           <div className="flex items-center gap-2 opacity-30">
@@ -104,13 +109,14 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" /></svg>
           Back
         </button>
-        <span className="text-xs font-bold text-slate-400 uppercase">Inspection Flow</span>
+        <span className="text-xs font-bold text-slate-400 uppercase">🎄 Inspection Flow 🎅</span>
         <div className="w-10"></div>
       </div>
 
-      <header>
-        <h2 className="text-2xl font-bold text-slate-800">{property.name}</h2>
-        <p className="text-slate-500 text-sm">Capture photos of all 4 rooms ({completedRooms}/4 complete)</p>
+      <header className="relative">
+        <div className="absolute -top-2 -right-2 text-2xl animate-pulse">❄️</div>
+        <h2 className="text-2xl font-bold text-slate-800">{property.name} 🏠</h2>
+        <p className="text-slate-500 text-sm">📸 Capture photos of all 4 rooms ({completedRooms}/4 complete) 🎁</p>
       </header>
 
       {/* Progress Indicator */}
@@ -118,9 +124,9 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
         {ROOMS.map((room, index) => (
           <div
             key={room.id}
-            className={`flex-1 h-2 rounded-full ${
-              roomImages[room.key] ? 'bg-green-500' : 
-              index === currentRoomIndex ? 'bg-blue-500' : 'bg-slate-200'
+            className={`flex-1 h-2 rounded-full transition-all ${
+              roomImages[room.key] ? 'bg-gradient-to-r from-[#10B981] to-[#059669]' : 
+              index === currentRoomIndex ? 'bg-gradient-to-r from-[#54A18A] to-[#007A67]' : 'bg-slate-200'
             }`}
           />
         ))}
@@ -141,9 +147,9 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
                   setShowCamera(true);
                 }
               }}
-              className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 relative overflow-hidden ${
-                isCurrent ? 'border-blue-600 bg-blue-50' : 
-                hasPhoto ? 'border-green-500 bg-green-50' : 'border-slate-100 bg-white'
+              className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 relative overflow-hidden shadow-sm ${
+                isCurrent ? 'border-[#54A18A] bg-gradient-to-br from-blue-50 to-teal-50 shadow-md' : 
+                hasPhoto ? 'border-[#10B981] bg-gradient-to-br from-green-50 to-teal-50' : 'border-slate-100 bg-white hover:border-[#54A18A]/30'
               }`}
             >
               {hasPhoto && (
@@ -159,7 +165,7 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
                 <span className="text-3xl">{room.icon}</span>
                 <span className="font-bold text-slate-800 text-sm">{room.name}</span>
                 {hasPhoto ? (
-                  <span className="text-green-600 text-xs font-semibold flex items-center gap-1">
+                  <span className="text-[#10B981] text-xs font-semibold flex items-center gap-1">
                     ✓ Captured
                   </span>
                 ) : (
@@ -175,14 +181,14 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
       {!roomImages[currentRoom.key] && (
         <button
           onClick={() => setShowCamera(true)}
-          className="w-full aspect-video bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl shadow-lg flex flex-col items-center justify-center gap-3 active:scale-[0.99] transition-all"
+          className="w-full aspect-video bg-gradient-to-br from-[#54A18A] to-[#007A67] text-white rounded-2xl shadow-lg flex flex-col items-center justify-center gap-3 active:scale-[0.99] transition-all hover:shadow-xl"
         >
           <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-4xl">
             📷
           </div>
           <div className="text-center">
             <p className="font-bold text-lg">Capture {currentRoom.name}</p>
-            <p className="text-blue-100 text-sm">Take photo after checkout</p>
+            <p className="text-white/80 text-sm">Take photo after checkout</p>
           </div>
         </button>
       )}
@@ -190,15 +196,15 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
       {/* Retake current photo */}
       {roomImages[currentRoom.key] && (
         <div className="space-y-3">
-          <div className="relative aspect-video bg-slate-900 border-2 border-green-500 rounded-2xl overflow-hidden">
+          <div className="relative aspect-video bg-slate-900 border-2 border-[#10B981] rounded-2xl overflow-hidden shadow-md">
             <img src={roomImages[currentRoom.key]!} className="w-full h-full object-cover" alt={currentRoom.name} />
-            <div className="absolute top-3 left-3 bg-green-500 text-white px-3 py-1 rounded-lg text-sm font-bold">
+            <div className="absolute top-3 left-3 bg-gradient-to-r from-[#10B981] to-[#059669] text-white px-3 py-1 rounded-lg text-sm font-bold shadow-md">
               {currentRoom.icon} {currentRoom.name}
             </div>
             <div className="absolute top-3 right-3">
               <button
                 onClick={() => setShowCamera(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg active:scale-95 transition-all"
+                className="bg-gradient-to-r from-[#54A18A] to-[#007A67] text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg active:scale-95 transition-all hover:shadow-xl"
               >
                 📷 Retake
               </button>
@@ -208,7 +214,7 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
       )}
 
       {error && (
-        <p className="text-red-500 text-sm font-medium bg-red-50 p-3 rounded-xl border border-red-100">
+        <p className="text-red-500 text-sm font-medium bg-red-50 p-3 rounded-xl border border-red-200 shadow-sm">
           {error}
         </p>
       )}
@@ -216,7 +222,7 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
       <button
         disabled={!allPhotosComplete}
         onClick={startAnalysis}
-        className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 disabled:opacity-50 disabled:shadow-none transition-all active:scale-[0.98]"
+        className="w-full bg-gradient-to-r from-[#54A18A] to-[#007A67] text-white font-bold py-4 rounded-xl shadow-lg disabled:opacity-50 disabled:shadow-none transition-all active:scale-[0.98] hover:shadow-xl disabled:from-slate-400 disabled:to-slate-500"
       >
         {allPhotosComplete ? '✅ Analyze All Rooms' : `📷 Capture remaining ${4 - completedRooms} room(s)`}
       </button>

@@ -127,11 +127,11 @@ export default function LevelIndicator({ onValidityChange }: LevelIndicatorProps
   if (error || hasPermission === false) {
     return (
       <div className="text-center p-3">
-        <div className="text-xs text-yellow-400 mb-2">{error || 'Sensor unavailable'}</div>
+        <div className="text-xs text-yellow-300 mb-2">{error || 'Sensor unavailable'}</div>
         {typeof (DeviceOrientationEvent as any).requestPermission === 'function' && (
           <button
             onClick={requestPermissionManually}
-            className="text-xs bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full text-white font-bold shadow-lg active:scale-95 transition-all"
+            className="text-xs bg-gradient-to-r from-[#54A18A] to-[#007A67] hover:shadow-lg px-4 py-2 rounded-full text-white font-bold shadow-md active:scale-95 transition-all"
           >
             Enable Level Sensor
           </button>
@@ -142,20 +142,20 @@ export default function LevelIndicator({ onValidityChange }: LevelIndicatorProps
 
   return (
     <div className="text-center p-3">
-      <div className={`text-sm font-bold mb-2 ${isPitchValid ? 'text-green-400' : 'text-white'}`}>
+      <div className={`text-sm font-bold mb-2 ${isPitchValid ? 'text-[#10B981]' : 'text-white'}`}>
         {isPitchValid ? "Perfect Angle 👍" : "Hold phone upright"}
       </div>
       
       {/* Visual pitch indicator */}
       <div className="flex items-center justify-center gap-3">
-        <div className="text-xs text-white/60">85°</div>
-        <div className="w-32 h-2 bg-white/20 rounded-full relative">
+        <div className="text-xs text-white/80">85°</div>
+        <div className="w-32 h-2 bg-white/20 rounded-full relative shadow-inner">
           {/* Acceptable range highlight */}
-          <div className="absolute top-0 left-0 w-full h-full bg-green-500/30 rounded-full"></div>
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-[#10B981]/40 to-[#10B981]/30 rounded-full"></div>
           {/* Current position indicator */}
           <div
-            className={`w-3 h-3 rounded-full absolute top-1/2 -translate-y-1/2 transition-all duration-100 ${
-              isPitchValid ? 'bg-green-400' : 'bg-yellow-400'
+            className={`w-3 h-3 rounded-full absolute top-1/2 -translate-y-1/2 transition-all duration-100 shadow-lg ${
+              isPitchValid ? 'bg-gradient-to-br from-[#10B981] to-[#059669]' : 'bg-gradient-to-br from-yellow-400 to-yellow-500'
             }`}
             style={{
               left: `${Math.max(0, Math.min(100, ((beta - 85) / 10) * 100))}%`,
@@ -163,10 +163,10 @@ export default function LevelIndicator({ onValidityChange }: LevelIndicatorProps
             }}
           ></div>
         </div>
-        <div className="text-xs text-white/60">95°</div>
+        <div className="text-xs text-white/80">95°</div>
       </div>
       
-      <div className="mt-2 text-[10px] text-white/60">
+      <div className="mt-2 text-[10px] text-white/70">
         <p>Pitch: {beta.toFixed(1)}°</p>
       </div>
     </div>
