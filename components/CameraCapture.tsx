@@ -149,7 +149,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onPhotoCapture, onCancel,
         
         {/* Overlay image with opacity */}
         <img 
-          src="/IMG_5500.PNG" 
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Studio_apartment.webp/1200px-Studio_apartment.webp.png" 
           alt="Overlay" 
           className="absolute inset-0 w-full h-full object-cover opacity-55 pointer-events-none"
         />
