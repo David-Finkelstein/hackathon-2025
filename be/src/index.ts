@@ -7,6 +7,7 @@ import {
 } from "@google/genai";
 import dotenv from "dotenv";
 import express, { Request, Response } from "express";
+import cors from "cors";
 import multer from "multer";
 import * as path from "path";
 import * as fs from "fs";
@@ -257,6 +258,15 @@ const genAI = initializeGenAI();
 
 // Create Express app
 const app = express();
+
+// Enable CORS for all origins (configure as needed for production)
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://hackathon-2025-seven-ochre.vercel.app'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 /**
