@@ -76,8 +76,8 @@ export default function LevelIndicator({ onValidityChange }: LevelIndicatorProps
     };
   }, []);
 
-  // Calculate if the phone pitch is between 80-100 degrees (upright position)
-  const isPitchValid = beta >= 80 && beta <= 100;
+  // Calculate if the phone pitch is between 85-95 degrees (upright position)
+  const isPitchValid = beta >= 85 && beta <= 95;
 
   // Notify parent component when validity changes
   useEffect(() => {
@@ -148,7 +148,7 @@ export default function LevelIndicator({ onValidityChange }: LevelIndicatorProps
       
       {/* Visual pitch indicator */}
       <div className="flex items-center justify-center gap-3">
-        <div className="text-xs text-white/60">80°</div>
+        <div className="text-xs text-white/60">85°</div>
         <div className="w-32 h-2 bg-white/20 rounded-full relative">
           {/* Acceptable range highlight */}
           <div className="absolute top-0 left-0 w-full h-full bg-green-500/30 rounded-full"></div>
@@ -158,12 +158,12 @@ export default function LevelIndicator({ onValidityChange }: LevelIndicatorProps
               isPitchValid ? 'bg-green-400' : 'bg-yellow-400'
             }`}
             style={{
-              left: `${Math.max(0, Math.min(100, ((beta - 80) / 20) * 100))}%`,
+              left: `${Math.max(0, Math.min(100, ((beta - 85) / 10) * 100))}%`,
               transform: 'translate(-50%, -50%)'
             }}
           ></div>
         </div>
-        <div className="text-xs text-white/60">100°</div>
+        <div className="text-xs text-white/60">95°</div>
       </div>
       
       <div className="mt-2 text-[10px] text-white/60">

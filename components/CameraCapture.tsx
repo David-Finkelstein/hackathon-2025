@@ -247,7 +247,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onPhotoCapture, onCancel,
             <p className="text-center text-sm text-slate-400 mt-4">
               {isPitchValid 
                 ? 'Tap to capture • Use grid for alignment'
-                : '⚠️ Hold phone upright (80-100°) to enable capture'
+                : '⚠️ Hold phone upright (85-95°) to enable capture'
               }
             </p>
           </div>
