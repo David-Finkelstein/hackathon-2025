@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { Property, InspectionResult } from '../types';
 import { analyzePropertyImages } from '../services/geminiService';
+import CameraCapture from './CameraCapture';
 
 interface InspectionWizardProps {
   property: Property;
@@ -23,6 +24,7 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
   const [currentImage, setCurrentImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showCamera, setShowCamera] = useState<'baseline' | 'current' | null>(null);
 
   const baselineInputRef = useRef<HTMLInputElement>(null);
   const currentInputRef = useRef<HTMLInputElement>(null);
@@ -52,6 +54,23 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
       setIsAnalyzing(false);
     }
   };
+
+  if (showCamera) {
+    return (
+      <CameraCapture
+        title={showCamera === 'baseline' ? 'Baseline Photo (Before Stay)' : 'Current Photo (After Checkout)'}
+        onPhotoCapture={(photoDataUrl) => {
+          if (showCamera === 'baseline') {
+            setBaselineImage(photoDataUrl);
+          } else {
+            setCurrentImage(photoDataUrl);
+          }
+          setShowCamera(null);
+        }}
+        onCancel={() => setShowCamera(null)}
+      />
+    );
+  }
 
   if (isAnalyzing) {
     return (
@@ -112,43 +131,138 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
 
       {step === 2 && (
         <div className="space-y-6">
+          {/* Baseline Photo */}
           <div className="space-y-2">
-            <label className="block text-sm font-bold text-slate-700 uppercase tracking-tight">1. Baseline Photo (Before Stay)</label>
-            <div 
-              onClick={() => baselineInputRef.current?.click()}
-              className="aspect-video bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center overflow-hidden cursor-pointer active:scale-[0.99] transition-all"
-            >
-              {baselineImage ? (
+            <label className="block text-sm font-bold text-slate-700 uppercase tracking-tight">
+              1. Baseline Photo (Before Stay)
+            </label>
+            
+            {baselineImage ? (
+              <div className="relative aspect-video bg-slate-900 border-2 border-slate-300 rounded-2xl overflow-hidden">
                 <img src={baselineImage} className="w-full h-full object-cover" />
-              ) : (
-                <div className="text-center p-4">
-                  <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-2">📷</div>
-                  <p className="text-slate-400 text-xs font-bold uppercase">Click to upload or take photo</p>
+                <div className="absolute top-3 right-3 flex gap-2">
+                  <button
+                    onClick={() => setShowCamera('baseline')}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg active:scale-95 transition-all"
+                  >
+                    📷 Retake
+                  </button>
                 </div>
-              )}
-            </div>
-            <input type="file" ref={baselineInputRef} className="hidden" onChange={(e) => handleFileChange(e, 'baseline')} accept="image/*" />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <button
+                  onClick={() => setShowCamera('baseline')}
+                  className="w-full aspect-video bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl shadow-lg flex flex-col items-center justify-center gap-3 active:scale-[0.99] transition-all"
+                >
+                  <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-4xl">
+                    📷
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold text-lg">Open Camera</p>
+                    <p className="text-blue-100 text-sm">Take baseline photo</p>
+                  </div>
+                </button>
+                
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-300"></div>
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="bg-white px-2 text-slate-500 font-medium">OR</span>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => baselineInputRef.current?.click()}
+                  className="w-full bg-white border-2 border-slate-300 text-slate-700 py-3 rounded-xl font-bold active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  📁 Upload from Files
+                </button>
+                <input 
+                  type="file" 
+                  ref={baselineInputRef} 
+                  className="hidden" 
+                  onChange={(e) => handleFileChange(e, 'baseline')} 
+                  accept="image/*,image/heic,image/heif" 
+                  capture="environment"
+                />
+              </div>
+            )}
           </div>
 
+          {/* Current Photo */}
           <div className="space-y-2">
-            <label className="block text-sm font-bold text-slate-700 uppercase tracking-tight">2. Current Photo (After Checkout)</label>
-            <div 
-              onClick={() => currentInputRef.current?.click()}
-              className="aspect-video bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center overflow-hidden cursor-pointer active:scale-[0.99] transition-all"
-            >
-              {currentImage ? (
+            <label className="block text-sm font-bold text-slate-700 uppercase tracking-tight">
+              2. Current Photo (After Checkout)
+            </label>
+            
+            {currentImage ? (
+              <div className="relative aspect-video bg-slate-900 border-2 border-slate-300 rounded-2xl overflow-hidden">
                 <img src={currentImage} className="w-full h-full object-cover" />
-              ) : (
-                <div className="text-center p-4">
-                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">📸</div>
-                  <p className="text-slate-400 text-xs font-bold uppercase">Click to capture current state</p>
+                <div className="absolute top-3 right-3 flex gap-2">
+                  <button
+                    onClick={() => setShowCamera('current')}
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg active:scale-95 transition-all"
+                  >
+                    📸 Retake
+                  </button>
                 </div>
-              )}
-            </div>
-            <input type="file" ref={currentInputRef} className="hidden" onChange={(e) => handleFileChange(e, 'current')} accept="image/*" />
+              </div>
+            ) : baselineImage ? (
+              <div className="space-y-3">
+                <button
+                  onClick={() => setShowCamera('current')}
+                  className="w-full aspect-video bg-gradient-to-br from-green-600 to-green-700 text-white rounded-2xl shadow-lg flex flex-col items-center justify-center gap-3 active:scale-[0.99] transition-all"
+                >
+                  <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-4xl">
+                    📸
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold text-lg">Open Camera</p>
+                    <p className="text-green-100 text-sm">Take current state photo</p>
+                  </div>
+                </button>
+                
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-300"></div>
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="bg-white px-2 text-slate-500 font-medium">OR</span>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => currentInputRef.current?.click()}
+                  className="w-full bg-white border-2 border-slate-300 text-slate-700 py-3 rounded-xl font-bold active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  📁 Upload from Files
+                </button>
+                <input 
+                  type="file" 
+                  ref={currentInputRef} 
+                  className="hidden" 
+                  onChange={(e) => handleFileChange(e, 'current')} 
+                  accept="image/*,image/heic,image/heif" 
+                  capture="environment"
+                />
+              </div>
+            ) : (
+              <div className="aspect-video bg-slate-100 border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center text-slate-400">
+                <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-3 text-2xl">
+                  📸
+                </div>
+                <p className="text-sm font-bold">Complete baseline photo first</p>
+              </div>
+            )}
           </div>
 
-          {error && <p className="text-red-500 text-sm font-medium bg-red-50 p-3 rounded-xl border border-red-100">{error}</p>}
+          {error && (
+            <p className="text-red-500 text-sm font-medium bg-red-50 p-3 rounded-xl border border-red-100">
+              {error}
+            </p>
+          )}
 
           <button
             disabled={!baselineImage || !currentImage}
