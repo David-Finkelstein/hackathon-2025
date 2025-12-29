@@ -7,7 +7,7 @@
   "scripts": {
     "dev:be": "tsx watch src/index.ts",
     "build:be": "tsc",
-    "start:be": "node dist/index.js"
+    "start": "node dist/index.js"
   },
   "keywords": [
     "AI",
