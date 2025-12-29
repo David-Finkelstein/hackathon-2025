@@ -1,6 +1,6 @@
 import { CompareResponse, UploadResponse, RoomImages } from '../types';
 
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://hackathon-2025-39q9.onrender.com';
 
 /**
  * Convert base64 data URL to Blob for file upload
