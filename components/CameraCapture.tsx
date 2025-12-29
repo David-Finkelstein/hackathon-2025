@@ -135,6 +135,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onPhotoCapture, onCancel,
         </button>
       </div>
 
+      
       {/* Camera View */}
       <div className="flex-1 relative overflow-hidden bg-black">
         <video
@@ -143,6 +144,13 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onPhotoCapture, onCancel,
           playsInline
           muted
           className="w-full h-full object-cover"
+        />
+        
+        {/* Overlay image with opacity */}
+        <img 
+          src="/IMG_5500.PNG" 
+          alt="Overlay" 
+          className="absolute inset-0 w-full h-full object-cover opacity-55 pointer-events-none"
         />
         
         {!isReady && !error && (
