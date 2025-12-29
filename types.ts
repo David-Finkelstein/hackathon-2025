@@ -1,4 +1,3 @@
-
 export enum Severity {
   LOW = 'LOW',
   MEDIUM = 'MEDIUM',
@@ -28,6 +27,49 @@ export interface InspectionResult {
   findings: Finding[];
   summary: string;
   analyzedAt: string;
+}
+
+// Backend API Types
+export interface DamageItem {
+  itemName: string;
+  condition: 'missing' | 'damaged' | 'broken';
+  description: string;
+  severity: 'low' | 'medium' | 'high';
+}
+
+export interface RoomAssessment {
+  room: string;
+  damageDetected: boolean;
+  items: DamageItem[];
+  notes?: string;
+}
+
+export interface ItemToCheck {
+  room: string;
+  item: string;
+}
+
+export interface FinalSummary {
+  overallStatus: 'all_clear' | 'minor_issues' | 'major_concerns';
+  summary: string;
+  itemsToCheck: ItemToCheck[];
+  totalIssuesFound: number;
+}
+
+export interface CompareResponse {
+  summary: FinalSummary;
+  roomAssessments: RoomAssessment[];
+}
+
+export interface UploadResponse {
+  fileName: string;
+}
+
+export interface RoomImages {
+  kitchen: string | null;
+  bathroom: string | null;
+  livingRoom: string | null;
+  bedroom: string | null;
 }
 
 export interface Property {

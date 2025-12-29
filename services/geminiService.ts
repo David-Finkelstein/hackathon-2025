@@ -1,78 +1,97 @@
+import { CompareResponse, UploadResponse, RoomImages } from '../types';
 
-import { GoogleGenAI, Type } from "@google/genai";
-import { InspectionResult } from '../types';
+const API_BASE_URL = 'http://localhost:3000';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-
-export const analyzePropertyImages = async (
-  baselineBase64: string,
-  currentBase64: string,
-  roomType: string = 'Living Room'
-): Promise<InspectionResult> => {
-  // Extract pure base64 from data URL if needed
-  const cleanBase64 = (str: string) => str.split(',')[1] || str;
-
-  const prompt = `
-    You are an expert property inspector for luxury vacation rentals.
-    I am providing two images: a BASELINE image (before the guest stay) and a CURRENT image (after checkout).
-    
-    TASK:
-    1. Compare the two images carefully.
-    2. Identify any:
-       - DAMAGE: Scratches, stains, breaks, tears, or broken items.
-       - MISSING_ITEM: Objects in the baseline that are gone in the current photo.
-       - CLEANLINESS: Mess, spills, or uncleaned areas.
-       - MOVED: Significant furniture displacement.
-    3. Provide an estimated cost for repair or replacement in USD.
-    4. Room context: ${roomType}.
-
-    Respond ONLY in valid JSON format matching this schema:
-    {
-      "findings": [
-        {
-          "id": "string",
-          "type": "DAMAGE | MISSING_ITEM | CLEANLINESS | MOVED",
-          "item": "string",
-          "description": "string",
-          "severity": "LOW | MEDIUM | HIGH | CRITICAL",
-          "confidence": number (0.0-1.0),
-          "estimatedCost": "string (e.g. $50-$100)",
-          "location": "string (e.g. center, top-left)"
-        }
-      ],
-      "summary": "string"
-    }
-  `;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: [
-        {
-          parts: [
-            { text: prompt },
-            { text: "BASELINE IMAGE (Before Stay):" },
-            { inlineData: { mimeType: "image/jpeg", data: cleanBase64(baselineBase64) } },
-            { text: "CURRENT IMAGE (After Stay):" },
-            { inlineData: { mimeType: "image/jpeg", data: cleanBase64(currentBase64) } },
-          ]
-        }
-      ],
-      config: {
-        responseMimeType: "application/json"
-      }
-    });
-
-    const resultText = response.text || "{}";
-    const parsed = JSON.parse(resultText);
-    
-    return {
-      findings: parsed.findings || [],
-      summary: parsed.summary || "No issues detected.",
-      analyzedAt: new Date().toISOString()
-    };
-  } catch (error) {
-    console.error("AI Analysis failed:", error);
-    throw new Error("Failed to analyze images. Please try again.");
+/**
+ * Convert base64 data URL to Blob for file upload
+ */
+const dataURLtoBlob = (dataURL: string): Blob => {
+  const parts = dataURL.split(',');
+  const mime = parts[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+  const bstr = atob(parts[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
   }
+  return new Blob([u8arr], { type: mime });
+};
+
+/**
+ * Upload a single image to the backend
+ * Returns the file name from Gemini File API
+ */
+export const uploadImage = async (imageBase64: string): Promise<string> => {
+  const blob = dataURLtoBlob(imageBase64);
+  const formData = new FormData();
+  formData.append('image', blob, 'photo.jpg');
+
+  const response = await fetch(`${API_BASE_URL}/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to upload image');
+  }
+
+  const data: UploadResponse = await response.json();
+  return data.fileName;
+};
+
+/**
+ * Compare all room images using the backend API
+ */
+export const compareRooms = async (filenames: {
+  kitchenFilename: string;
+  bathroomFilename: string;
+  livingRoomFilename: string;
+  bedroomFilename: string;
+}): Promise<CompareResponse> => {
+  const response = await fetch(`${API_BASE_URL}/compare`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(filenames),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to compare images');
+  }
+
+  return response.json();
+};
+
+/**
+ * Upload all room images and then compare them
+ * This is the main function to call from the UI
+ */
+export const analyzeAllRooms = async (
+  roomImages: RoomImages
+): Promise<CompareResponse> => {
+  // Validate all images are present
+  if (!roomImages.kitchen || !roomImages.bathroom || !roomImages.livingRoom || !roomImages.bedroom) {
+    throw new Error('All four room images are required');
+  }
+
+  // Upload all images in parallel
+  const [kitchenFilename, bathroomFilename, livingRoomFilename, bedroomFilename] = await Promise.all([
+    uploadImage(roomImages.kitchen),
+    uploadImage(roomImages.bathroom),
+    uploadImage(roomImages.livingRoom),
+    uploadImage(roomImages.bedroom),
+  ]);
+
+  // Compare all rooms
+  const result = await compareRooms({
+    kitchenFilename,
+    bathroomFilename,
+    livingRoomFilename,
+    bedroomFilename,
+  });
+
+  return result;
 };

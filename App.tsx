@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { AppView, Property, Finding, InspectionResult } from './types';
+import { AppView, Property, CompareResponse, RoomImages } from './types';
 import Dashboard from './components/Dashboard';
 import InspectionWizard from './components/InspectionWizard';
 import AnalysisView from './components/AnalysisView';
@@ -35,8 +35,8 @@ const MOCK_PROPERTIES: Property[] = [
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>('DASHBOARD');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-  const [inspectionResult, setInspectionResult] = useState<InspectionResult | null>(null);
-  const [images, setImages] = useState<{ baseline: string; current: string } | null>(null);
+  const [inspectionResult, setInspectionResult] = useState<CompareResponse | null>(null);
+  const [roomImages, setRoomImages] = useState<RoomImages | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const startInspection = (property: Property) => {
@@ -44,9 +44,9 @@ const App: React.FC = () => {
     setView('INSPECTION_WIZARD');
   };
 
-  const onAnalysisComplete = (result: InspectionResult, baseline: string, current: string) => {
+  const onAnalysisComplete = (result: CompareResponse, images: RoomImages) => {
     setInspectionResult(result);
-    setImages({ baseline, current });
+    setRoomImages(images);
     setView('ANALYSIS');
   };
 
@@ -58,7 +58,7 @@ const App: React.FC = () => {
     setView('DASHBOARD');
     setSelectedProperty(null);
     setInspectionResult(null);
-    setImages(null);
+    setRoomImages(null);
   };
 
   return (
@@ -167,10 +167,10 @@ const App: React.FC = () => {
           />
         )}
 
-        {view === 'ANALYSIS' && inspectionResult && images && (
+        {view === 'ANALYSIS' && inspectionResult && roomImages && (
           <AnalysisView 
             result={inspectionResult} 
-            images={images} 
+            roomImages={roomImages} 
             onFinalize={finalizeInspection}
             onBack={() => setView('INSPECTION_WIZARD')}
           />

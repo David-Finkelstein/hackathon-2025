@@ -1,41 +1,59 @@
-
 import React, { useState } from 'react';
-import { Property, InspectionResult } from '../types';
-import { analyzePropertyImages } from '../services/geminiService';
+import { Property, CompareResponse, RoomImages } from '../types';
+import { analyzeAllRooms } from '../services/geminiService';
 import CameraCapture from './CameraCapture';
 
 interface InspectionWizardProps {
   property: Property;
   onCancel: () => void;
-  onAnalyze: (result: InspectionResult, baseline: string, current: string) => void;
+  onAnalyze: (result: CompareResponse, roomImages: RoomImages) => void;
 }
 
 const ROOMS = [
-  { id: 'living', name: 'Living Room', icon: '🛋️' },
-  { id: 'kitchen', name: 'Kitchen', icon: '🍳' },
-  { id: 'bedroom', name: 'Bedroom', icon: '🛏️' },
-  { id: 'bathroom', name: 'Bathroom', icon: '🛁' },
+  { id: 'kitchen', name: 'Kitchen', icon: '🍳', key: 'kitchen' as const },
+  { id: 'bathroom', name: 'Bathroom', icon: '🛁', key: 'bathroom' as const },
+  { id: 'livingRoom', name: 'Living Room', icon: '🛋️', key: 'livingRoom' as const },
+  { id: 'bedroom', name: 'Bedroom', icon: '🛏️', key: 'bedroom' as const },
 ];
 
 const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel, onAnalyze }) => {
-  const [step, setStep] = useState(1);
-  const [roomType, setRoomType] = useState('Living Room');
-  const [baselineImage, setBaselineImage] = useState<string | null>(null);
-  const [currentImage, setCurrentImage] = useState<string | null>(null);
+  const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
+  const [roomImages, setRoomImages] = useState<RoomImages>({
+    kitchen: null,
+    bathroom: null,
+    livingRoom: null,
+    bedroom: null,
+  });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showCamera, setShowCamera] = useState<'baseline' | 'current' | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
+
+  const currentRoom = ROOMS[currentRoomIndex];
+  const allPhotosComplete = ROOMS.every(room => roomImages[room.key] !== null);
+  const completedRooms = ROOMS.filter(room => roomImages[room.key] !== null).length;
+
+  const handlePhotoCapture = (photoDataUrl: string) => {
+    setRoomImages(prev => ({
+      ...prev,
+      [currentRoom.key]: photoDataUrl,
+    }));
+    setShowCamera(false);
+    
+    // Auto-advance to next room if not the last one
+    if (currentRoomIndex < ROOMS.length - 1) {
+      setCurrentRoomIndex(currentRoomIndex + 1);
+    }
+  };
 
   const startAnalysis = async () => {
-    if (!baselineImage) return;
+    if (!allPhotosComplete) return;
     setIsAnalyzing(true);
     setError(null);
     try {
-      // const result = // API
-      const result = await analyzePropertyImages(baselineImage, currentImage, roomType);
-      onAnalyze(result, baselineImage, currentImage);
+      const result = await analyzeAllRooms(roomImages);
+      onAnalyze(result, roomImages);
     } catch (err: any) {
-      setError(err.message || "Something went wrong.");
+      setError(err.message || 'Something went wrong.');
       setIsAnalyzing(false);
     }
   };
@@ -43,16 +61,9 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
   if (showCamera) {
     return (
       <CameraCapture
-        title={showCamera === 'baseline' && `${roomType}`}
-        onPhotoCapture={(photoDataUrl) => {
-          if (showCamera === 'baseline') {
-            setBaselineImage(photoDataUrl);
-          } else {
-            setCurrentImage(photoDataUrl);
-          }
-          setShowCamera(null);
-        }}
-        onCancel={() => setShowCamera(null)}
+        title={currentRoom.name}
+        onPhotoCapture={handlePhotoCapture}
+        onCancel={() => setShowCamera(false)}
       />
     );
   }
@@ -62,17 +73,17 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
       <div className="flex flex-col items-center justify-center p-8 h-[70vh] text-center space-y-6">
         <div className="w-24 h-24 border-8 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-slate-800">Analyzing Images...</h2>
+          <h2 className="text-2xl font-bold text-slate-800">Analyzing All Rooms...</h2>
           <p className="text-slate-500">AI is comparing baseline and current photos for damages and missing items.</p>
         </div>
         <div className="bg-slate-50 p-4 rounded-xl w-full text-left">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-4 h-4 rounded-full bg-green-500"></div>
-            <span className="text-sm font-medium text-slate-700">Objects identified</span>
+            <span className="text-sm font-medium text-slate-700">Uploading images</span>
           </div>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-4 h-4 rounded-full bg-blue-500 animate-pulse"></div>
-            <span className="text-sm font-medium text-slate-700">Checking for damages</span>
+            <span className="text-sm font-medium text-slate-700">Analyzing 4 rooms for damages</span>
           </div>
           <div className="flex items-center gap-2 opacity-30">
             <div className="w-4 h-4 rounded-full bg-slate-300"></div>
@@ -87,7 +98,7 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
     <div className="p-4 space-y-6">
       <div className="flex items-center justify-between">
         <button 
-          onClick={() => step === 1 ? onCancel() : setStep(1)} 
+          onClick={onCancel} 
           className="text-slate-400 flex items-center gap-1 font-semibold text-sm"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" /></svg>
@@ -99,71 +110,116 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
 
       <header>
         <h2 className="text-2xl font-bold text-slate-800">{property.name}</h2>
-        <p className="text-slate-500 text-sm">Step {step} of 3: {step === 1 ? 'Select Room' : step === 2 ? 'Upload Photos' : 'Review'}</p>
+        <p className="text-slate-500 text-sm">Capture photos of all 4 rooms ({completedRooms}/4 complete)</p>
       </header>
 
-      {step === 1 && (
-        <div className="grid grid-cols-2 gap-4">
-          {ROOMS.map(room => (
+      {/* Progress Indicator */}
+      <div className="flex gap-2">
+        {ROOMS.map((room, index) => (
+          <div
+            key={room.id}
+            className={`flex-1 h-2 rounded-full ${
+              roomImages[room.key] ? 'bg-green-500' : 
+              index === currentRoomIndex ? 'bg-blue-500' : 'bg-slate-200'
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Room Grid */}
+      <div className="grid grid-cols-2 gap-4">
+        {ROOMS.map((room, index) => {
+          const hasPhoto = roomImages[room.key] !== null;
+          const isCurrent = index === currentRoomIndex;
+          
+          return (
             <button
               key={room.id}
-              onClick={() => { setRoomType(room.name); setStep(2); }}
-              className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${roomType === room.name ? 'border-blue-600 bg-blue-50' : 'border-slate-100 bg-white'}`}
+              onClick={() => {
+                setCurrentRoomIndex(index);
+                if (!hasPhoto) {
+                  setShowCamera(true);
+                }
+              }}
+              className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 relative overflow-hidden ${
+                isCurrent ? 'border-blue-600 bg-blue-50' : 
+                hasPhoto ? 'border-green-500 bg-green-50' : 'border-slate-100 bg-white'
+              }`}
             >
-              <span className="text-4xl">{room.icon}</span>
-              <span className="font-bold text-slate-800">{room.name}</span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {step === 2 && (
-        <div className="space-y-6">
-          {/* Baseline Photo */}
-          <div className="space-y-2">
-            {baselineImage ? (
-              <div className="relative aspect-video bg-slate-900 border-2 border-slate-300 rounded-2xl overflow-hidden">
-                <img src={baselineImage} className="w-full h-full object-cover" />
-                <div className="absolute top-3 right-3 flex gap-2">
-                  <button
-                    onClick={() => setShowCamera('baseline')}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg active:scale-95 transition-all"
-                  >
-                    📷 Retake
-                  </button>
+              {hasPhoto && (
+                <div className="absolute inset-0">
+                  <img 
+                    src={roomImages[room.key]!} 
+                    className="w-full h-full object-cover opacity-30" 
+                    alt={room.name}
+                  />
                 </div>
+              )}
+              <div className="relative z-10 flex flex-col items-center">
+                <span className="text-3xl">{room.icon}</span>
+                <span className="font-bold text-slate-800 text-sm">{room.name}</span>
+                {hasPhoto ? (
+                  <span className="text-green-600 text-xs font-semibold flex items-center gap-1">
+                    ✓ Captured
+                  </span>
+                ) : (
+                  <span className="text-slate-400 text-xs">Tap to capture</span>
+                )}
               </div>
-            ) : (
-              <button
-                onClick={() => setShowCamera('baseline')}
-                className="w-full aspect-video bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl shadow-lg flex flex-col items-center justify-center gap-3 active:scale-[0.99] transition-all"
-              >
-                <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-4xl">
-                  📷
-                </div>
-                <div className="text-center">
-                  <p className="font-bold text-lg">Open Camera</p>
-                  <p className="text-blue-100 text-sm">Take baseline photo</p>
-                </div>
-              </button>
-            )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Current Room Action */}
+      {!roomImages[currentRoom.key] && (
+        <button
+          onClick={() => setShowCamera(true)}
+          className="w-full aspect-video bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl shadow-lg flex flex-col items-center justify-center gap-3 active:scale-[0.99] transition-all"
+        >
+          <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-4xl">
+            📷
           </div>
+          <div className="text-center">
+            <p className="font-bold text-lg">Capture {currentRoom.name}</p>
+            <p className="text-blue-100 text-sm">Take photo after checkout</p>
+          </div>
+        </button>
+      )}
 
-          {error && (
-            <p className="text-red-500 text-sm font-medium bg-red-50 p-3 rounded-xl border border-red-100">
-              {error}
-            </p>
-          )}
-
-          <button
-            disabled={!baselineImage}
-            onClick={startAnalysis}
-            className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 disabled:opacity-50 disabled:shadow-none transition-all active:scale-[0.98]"
-          >
-            ✅ Submit
-          </button>
+      {/* Retake current photo */}
+      {roomImages[currentRoom.key] && (
+        <div className="space-y-3">
+          <div className="relative aspect-video bg-slate-900 border-2 border-green-500 rounded-2xl overflow-hidden">
+            <img src={roomImages[currentRoom.key]!} className="w-full h-full object-cover" alt={currentRoom.name} />
+            <div className="absolute top-3 left-3 bg-green-500 text-white px-3 py-1 rounded-lg text-sm font-bold">
+              {currentRoom.icon} {currentRoom.name}
+            </div>
+            <div className="absolute top-3 right-3">
+              <button
+                onClick={() => setShowCamera(true)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg active:scale-95 transition-all"
+              >
+                📷 Retake
+              </button>
+            </div>
+          </div>
         </div>
       )}
+
+      {error && (
+        <p className="text-red-500 text-sm font-medium bg-red-50 p-3 rounded-xl border border-red-100">
+          {error}
+        </p>
+      )}
+
+      <button
+        disabled={!allPhotosComplete}
+        onClick={startAnalysis}
+        className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 disabled:opacity-50 disabled:shadow-none transition-all active:scale-[0.98]"
+      >
+        {allPhotosComplete ? '✅ Analyze All Rooms' : `📷 Capture remaining ${4 - completedRooms} room(s)`}
+      </button>
     </div>
   );
 };

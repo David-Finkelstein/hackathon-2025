@@ -1,18 +1,32 @@
-
 import React from 'react';
-import { InspectionResult, Property } from '../types';
+import { CompareResponse, Property } from '../types';
 
 interface ReportViewProps {
-  result: InspectionResult;
+  result: CompareResponse;
   property: Property;
   onClose: () => void;
 }
 
 const ReportView: React.FC<ReportViewProps> = ({ result, property, onClose }) => {
-  const totalCost = result.findings.reduce((acc, curr) => {
-    const costMatch = curr.estimatedCost?.match(/\d+/);
-    return acc + (costMatch ? parseInt(costMatch[0]) : 0);
-  }, 0);
+  const totalIssues = result.summary.totalIssuesFound;
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'all_clear': return 'text-green-600';
+      case 'minor_issues': return 'text-yellow-600';
+      case 'major_concerns': return 'text-red-600';
+      default: return 'text-slate-600';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'all_clear': return 'All Clear';
+      case 'minor_issues': return 'Minor Issues';
+      case 'major_concerns': return 'Major Concerns';
+      default: return status;
+    }
+  };
 
   return (
     <div className="p-4 space-y-6">
@@ -47,19 +61,44 @@ const ReportView: React.FC<ReportViewProps> = ({ result, property, onClose }) =>
           </div>
         </div>
 
+        {/* Overall Status */}
         <div className="bg-slate-50 p-4 rounded-2xl">
-          <h4 className="text-slate-400 text-[10px] font-bold uppercase mb-2">Findings Summary</h4>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-slate-400 text-[10px] font-bold uppercase">Overall Status</h4>
+            <span className={`font-bold text-sm uppercase ${getStatusColor(result.summary.overallStatus)}`}>
+              {getStatusLabel(result.summary.overallStatus)}
+            </span>
+          </div>
+          <p className="text-slate-700 text-sm leading-relaxed">{result.summary.summary}</p>
+        </div>
+
+        {/* Items to Check */}
+        {result.summary.itemsToCheck.length > 0 && (
+          <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200">
+            <h4 className="text-amber-800 text-[10px] font-bold uppercase mb-2">Items Requiring Attention ({totalIssues})</h4>
+            <div className="space-y-2">
+              {result.summary.itemsToCheck.map((item, i) => (
+                <div key={i} className="flex justify-between items-center text-sm">
+                  <span className="text-amber-700">{item.item}</span>
+                  <span className="font-medium text-amber-800 text-xs">{item.room}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Room Assessments Summary */}
+        <div className="bg-slate-50 p-4 rounded-2xl">
+          <h4 className="text-slate-400 text-[10px] font-bold uppercase mb-3">Room-by-Room Summary</h4>
           <div className="space-y-2">
-            {result.findings.map((f, i) => (
-              <div key={i} className="flex justify-between items-center text-sm">
-                <span className="text-slate-700">{f.item} ({f.type.toLowerCase()})</span>
-                <span className="font-bold text-slate-800">{f.estimatedCost || '$0'}</span>
+            {result.roomAssessments.map((room, i) => (
+              <div key={i} className="flex justify-between items-center text-sm py-2 border-b border-slate-100 last:border-0">
+                <span className="text-slate-700 font-medium">{room.room}</span>
+                <span className={`font-bold ${room.damageDetected ? 'text-red-600' : 'text-green-600'}`}>
+                  {room.damageDetected ? `${room.items.length} issue(s)` : 'Clear'}
+                </span>
               </div>
             ))}
-            <div className="border-t border-slate-200 pt-2 mt-2 flex justify-between items-center font-bold">
-              <span className="text-slate-800 uppercase text-xs">Recommended Charge</span>
-              <span className="text-blue-600 text-lg">${totalCost}</span>
-            </div>
           </div>
         </div>
 
