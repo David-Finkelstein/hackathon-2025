@@ -5,14 +5,41 @@ interface CameraCaptureProps {
   onPhotoCapture: (photoDataUrl: string) => void;
   onCancel: () => void;
   title: string;
+  roomId?: string; // Optional room ID for fetching previous image
 }
 
-const CameraCapture: React.FC<CameraCaptureProps> = ({ onPhotoCapture, onCancel, title }) => {
+const CameraCapture: React.FC<CameraCaptureProps> = ({ onPhotoCapture, onCancel, title, roomId }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPitchValid, setIsPitchValid] = useState(false);
+  const [overlayImageUrl, setOverlayImageUrl] = useState<string | null>(null);
+
+  // Set static overlay image based on room type
+  useEffect(() => {
+    if (!roomId) {
+      setOverlayImageUrl(null);
+      return;
+    }
+
+    // Map roomId to static image paths in public folder
+    const roomImageMap: Record<string, string> = {
+      'kitchen': '/baseline-kitchen.jpg',
+      'bathroom': '/baseline-bathroom.jpg',
+      'livingRoom': '/baseline-livingroom.jpg',
+      'bedroom': '/baseline-bedroom.jpg',
+    };
+
+    const imagePath = roomImageMap[roomId];
+    if (imagePath) {
+      setOverlayImageUrl(imagePath);
+      console.log(`✅ Using static overlay image for ${roomId}: ${imagePath}`);
+    } else {
+      setOverlayImageUrl(null);
+      console.warn(`⚠️ No overlay image found for room: ${roomId}`);
+    }
+  }, [roomId]);
 
   useEffect(() => {
     // Check if we're in a secure context (HTTPS or localhost)
@@ -125,8 +152,6 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onPhotoCapture, onCancel,
     <div className="fixed inset-0 bg-gradient-to-br from-slate-900 to-slate-800 z-50 flex flex-col">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#54A18A] to-[#007A67] p-4 flex items-center justify-between shadow-md relative overflow-hidden">
-        <div className="absolute top-1 left-3 text-lg opacity-50">🎄</div>
-        <div className="absolute top-1 right-3 text-lg opacity-50">⛄</div>
         <h2 className="text-xl font-bold text-white relative z-10">📸 {title}</h2>
         <button
           onClick={handleCancel}
@@ -150,12 +175,14 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onPhotoCapture, onCancel,
           className="w-full h-full object-cover"
         />
         
-        {/* Overlay image with opacity */}
-        <img 
-          src="/PHOTO-2025-12-29-17-00-58.jpg" 
-          alt="Overlay" 
-          className="absolute inset-0 w-full h-full object-cover opacity-55 pointer-events-none"
-        />
+        {/* Overlay image with opacity - static baseline image based on room type */}
+        {overlayImageUrl && (
+          <img 
+            src={overlayImageUrl}
+            alt="Baseline comparison overlay" 
+            className="absolute inset-0 w-full h-full object-cover opacity-55 pointer-events-none"
+          />
+        )}
 
         {/* Level Indicator */}
         {isReady && !error && (

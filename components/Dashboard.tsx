@@ -11,16 +11,14 @@ const Dashboard: React.FC<DashboardProps> = ({ properties, onStartInspection }) 
   return (
     <div className="p-4 space-y-6">
       <div className="bg-gradient-to-br from-blue-50 to-teal-50 border border-blue-100 p-4 rounded-xl relative overflow-hidden">
-        <div className="absolute top-2 right-2 text-2xl opacity-30">🎄</div>
-        <div className="absolute bottom-2 left-2 text-xl opacity-30">⛄</div>
-        <h2 className="text-slate-800 font-semibold mb-1 relative z-10">Good morning, Maria! 👋🎅</h2>
-        <p className="text-slate-500 text-sm relative z-10">You have 2 inspections pending for today. 🎁</p>
+        <h2 className="text-slate-800 font-semibold mb-1 relative z-10">Good morning, Maria! 👋</h2>
+        <p className="text-slate-500 text-sm relative z-10">You have 2 inspections pending for today.</p>
       </div>
 
       <section>
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-slate-800 text-lg">Today's Checkouts 🏠</h3>
-          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">2 Scheduled ❄️</span>
+          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">2 Scheduled</span>
         </div>
 
         <div className="space-y-4">

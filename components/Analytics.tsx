@@ -52,8 +52,6 @@ const Analytics: React.FC<AnalyticsProps> = ({ onBack }) => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 pb-20">
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10 relative overflow-hidden">
-        <div className="absolute top-2 left-4 text-2xl opacity-20">🎄</div>
-        <div className="absolute top-2 right-4 text-2xl opacity-20">⛄</div>
         <div className="p-4 relative z-10">
           <div className="flex items-center justify-between mb-4">
             <button 
@@ -65,7 +63,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ onBack }) => {
               </svg>
               Back
             </button>
-            <h1 className="text-xl font-bold text-slate-800">📊 Analytics 🎁</h1>
+            <h1 className="text-xl font-bold text-slate-800">📊 Analytics</h1>
             <div className="w-10"></div>
           </div>
 
@@ -92,7 +90,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ onBack }) => {
         {/* Key Metrics */}
         <section>
           <h2 className="text-sm font-bold text-slate-600 uppercase tracking-wide mb-3 flex items-center gap-2">
-            Key Metrics ❄️
+            Key Metrics
           </h2>
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white p-4 rounded-xl border border-slate-200">

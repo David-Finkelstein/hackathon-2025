@@ -62,6 +62,7 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
     return (
       <CameraCapture
         title={currentRoom.name}
+        roomId={currentRoom.id}
         onPhotoCapture={handlePhotoCapture}
         onCancel={() => setShowCamera(false)}
       />
@@ -71,14 +72,9 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
   if (isAnalyzing) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-[70vh] text-center space-y-6 relative">
-        <div className="absolute top-8 left-8 text-3xl opacity-20 animate-pulse">🎄</div>
-        <div className="absolute top-8 right-8 text-3xl opacity-20 animate-pulse" style={{ animationDelay: '0.5s' }}>⛄</div>
-        <div className="absolute bottom-8 left-1/4 text-2xl opacity-20 animate-pulse" style={{ animationDelay: '0.3s' }}>❄️</div>
-        <div className="absolute bottom-8 right-1/4 text-2xl opacity-20 animate-pulse" style={{ animationDelay: '0.7s' }}>🎅</div>
-        
         <div className="w-24 h-24 border-8 border-[#007A67]/30 border-t-[#54A18A] rounded-full animate-spin relative z-10"></div>
         <div className="space-y-2 relative z-10">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-[#54A18A] to-[#007A67] bg-clip-text text-transparent">🎁 Analyzing All Rooms... 🎁</h2>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-[#54A18A] to-[#007A67] bg-clip-text text-transparent">Analyzing All Rooms...</h2>
           <p className="text-slate-600">AI is comparing baseline and current photos for damages and missing items.</p>
         </div>
         <div className="bg-gradient-to-br from-blue-50 to-teal-50 p-4 rounded-xl w-full text-left border border-[#54A18A]/20 shadow-sm">
@@ -109,14 +105,13 @@ const InspectionWizard: React.FC<InspectionWizardProps> = ({ property, onCancel,
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" /></svg>
           Back
         </button>
-        <span className="text-xs font-bold text-slate-400 uppercase">🎄 Inspection Flow 🎅</span>
+        <span className="text-xs font-bold text-slate-400 uppercase">Inspection Flow</span>
         <div className="w-10"></div>
       </div>
 
       <header className="relative">
-        <div className="absolute -top-2 -right-2 text-2xl animate-pulse">❄️</div>
         <h2 className="text-2xl font-bold text-slate-800">{property.name} 🏠</h2>
-        <p className="text-slate-500 text-sm">📸 Capture photos of all 4 rooms ({completedRooms}/4 complete) 🎁</p>
+        <p className="text-slate-500 text-sm">📸 Capture photos of all 4 rooms ({completedRooms}/4 complete)</p>
       </header>
 
       {/* Progress Indicator */}

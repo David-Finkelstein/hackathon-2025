@@ -77,7 +77,7 @@ export default function LevelIndicator({ onValidityChange }: LevelIndicatorProps
   }, []);
 
   // Calculate if the phone pitch is between 85-95 degrees (upright position)
-  const isPitchValid = beta >= 85 && beta <= 95;
+  const isPitchValid =  beta >= 85 && beta <= 95;
 
   // Notify parent component when validity changes
   useEffect(() => {

@@ -65,12 +65,6 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col max-w-lg mx-auto bg-gradient-to-br from-slate-50 to-blue-50 shadow-xl relative">
       {/* Header */}
       <header className="bg-gradient-to-r from-[#54A18A] to-[#007A67] text-white p-4 flex items-center justify-between sticky top-0 z-50 shadow-md relative overflow-hidden">
-        {/* Christmas decorations */}
-        <div className="absolute top-2 left-4 text-2xl animate-pulse">🎄</div>
-        {/* <div className="absolute top-2 right-4 text-2xl animate-pulse" style={{ animationDelay: '0.5s' }}>🎅</div> */}
-        <div className="absolute top-1 left-1/3 text-xl opacity-80">❄️</div>
-        <div className="absolute top-1 right-1/3 text-xl opacity-80" style={{ animationDelay: '0.3s' }}>⛄</div>
-        
         <div className="flex items-center gap-2 relative z-10" onClick={resetToDashboard} style={{ cursor: 'pointer' }}>
           {/* Guesty Logo */}
           <div className="relative">
@@ -79,10 +73,9 @@ const App: React.FC = () => {
               alt="Guesty" 
               className="h-8 w-auto"
             />
-            {/* <span className="absolute -top-1 -right-1 text-xs">🎄</span> */}
           </div>
           <span className="text-white/40 mx-1">|</span>
-          <h1 className="text-lg font-bold tracking-tight">Guard 🎁</h1>
+          <h1 className="text-lg font-bold tracking-tight">Guard</h1>
         </div>
         <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white/80 hover:text-white transition-colors relative z-10">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,8 +96,6 @@ const App: React.FC = () => {
           {/* Menu Drawer */}
           <div className="fixed top-0 right-0 h-full w-64 bg-white shadow-2xl z-50 transform transition-transform">
             <div className="p-4 bg-gradient-to-r from-[#54A18A] to-[#007A67] flex items-center justify-between relative overflow-hidden">
-              <div className="absolute top-1 left-2 text-lg opacity-60">🎄</div>
-              <div className="absolute bottom-1 right-2 text-lg opacity-60">⛄</div>
               <h2 className="font-bold text-white relative z-10">Menu</h2>
               <button 
                 onClick={() => setIsMenuOpen(false)}
@@ -209,10 +200,6 @@ const App: React.FC = () => {
       {/* Persistent Bottom Navigation */}
       {(view === 'DASHBOARD' || view === 'ANALYTICS') && (
         <div className="fixed bottom-0 max-w-lg w-full bg-white/95 backdrop-blur-sm border-t border-slate-100 p-4 flex justify-around shadow-lg relative overflow-hidden">
-          {/* Christmas decorations */}
-          <div className="absolute -top-1 left-4 text-xl opacity-30">❄️</div>
-          <div className="absolute -top-1 right-4 text-xl opacity-30">❄️</div>
-          
           <button 
             onClick={() => setView('DASHBOARD')}
             className={`flex flex-col items-center transition-all relative z-10 ${view === 'DASHBOARD' ? 'text-[#54A18A]' : 'text-slate-400 hover:text-[#54A18A]'}`}
