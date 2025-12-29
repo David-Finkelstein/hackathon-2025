@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import LevelIndicator from './LevelIndicator';
 
 interface CameraCaptureProps {
   onPhotoCapture: (photoDataUrl: string) => void;
@@ -152,6 +153,13 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onPhotoCapture, onCancel,
           alt="Overlay" 
           className="absolute inset-0 w-full h-full object-cover opacity-55 pointer-events-none"
         />
+
+        {/* Level Indicator */}
+        {isReady && !error && (
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/70 backdrop-blur rounded-2xl shadow-lg z-10">
+            <LevelIndicator />
+          </div>
+        )}
         
         {!isReady && !error && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 text-white">

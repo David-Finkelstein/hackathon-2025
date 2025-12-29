@@ -42,4 +42,4 @@ export interface Property {
   };
 }
 
-export type AppView = 'DASHBOARD' | 'INSPECTION_WIZARD' | 'ANALYSIS' | 'REPORT';
+export type AppView = 'DASHBOARD' | 'INSPECTION_WIZARD' | 'ANALYSIS' | 'REPORT' | 'ANALYTICS';
