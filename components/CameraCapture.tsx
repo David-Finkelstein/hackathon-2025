@@ -12,6 +12,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onPhotoCapture, onCancel,
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isPitchValid, setIsPitchValid] = useState(false);
 
   useEffect(() => {
     // Check if we're in a secure context (HTTPS or localhost)
@@ -157,7 +158,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onPhotoCapture, onCancel,
         {/* Level Indicator */}
         {isReady && !error && (
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/70 backdrop-blur rounded-2xl shadow-lg z-10">
-            <LevelIndicator />
+            <LevelIndicator onValidityChange={setIsPitchValid} />
           </div>
         )}
         
@@ -230,7 +231,12 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onPhotoCapture, onCancel,
               {/* Capture Button */}
               <button
                 onClick={handleCapture}
-                className="bg-white w-20 h-20 rounded-full shadow-2xl flex items-center justify-center text-4xl active:scale-95 transition-all border-4 border-slate-700"
+                disabled={!isPitchValid}
+                className={`w-20 h-20 rounded-full shadow-2xl flex items-center justify-center text-4xl transition-all border-4 ${
+                  isPitchValid
+                    ? 'bg-white border-slate-700 active:scale-95 cursor-pointer'
+                    : 'bg-slate-600 border-slate-800 opacity-50 cursor-not-allowed'
+                }`}
               >
                 📷
               </button>
@@ -239,7 +245,10 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onPhotoCapture, onCancel,
               <div className="w-14 h-14"></div>
             </div>
             <p className="text-center text-sm text-slate-400 mt-4">
-              Tap to capture • Use grid for alignment
+              {isPitchValid 
+                ? 'Tap to capture • Use grid for alignment'
+                : '⚠️ Hold phone upright (80-100°) to enable capture'
+              }
             </p>
           </div>
         </div>

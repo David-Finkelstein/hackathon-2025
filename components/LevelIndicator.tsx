@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 
-export default function LevelIndicator() {
-  const [gamma, setGamma] = useState(0); // left/right tilt
-  const [beta, setBeta] = useState(0);   // front/back tilt
+interface LevelIndicatorProps {
+  onValidityChange?: (isValid: boolean) => void;
+}
+
+export default function LevelIndicator({ onValidityChange }: LevelIndicatorProps) {
+  const [beta, setBeta] = useState(0);   // front/back tilt (pitch)
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -10,13 +13,12 @@ export default function LevelIndicator() {
     let cleanup: (() => void) | undefined;
 
     const handleOrientation = (event: DeviceOrientationEvent) => {
-      console.log('Orientation event:', event.gamma, event.beta);
-      if (event.gamma !== null && event.beta !== null) {
-        setGamma(event.gamma);
+      console.log('Orientation event - beta (pitch):', event.beta);
+      if (event.beta !== null) {
         setBeta(event.beta);
         setError(null);
       } else {
-        console.warn('Orientation values are null');
+        console.warn('Orientation beta value is null');
       }
     };
 
@@ -74,11 +76,15 @@ export default function LevelIndicator() {
     };
   }, []);
 
-  // Calculate if the phone is roughly level
-  const isLevel = Math.abs(beta) < 5 && Math.abs(gamma) < 5;
+  // Calculate if the phone pitch is between 80-100 degrees (upright position)
+  const isPitchValid = beta >= 80 && beta <= 100;
 
-  // Map gamma (-90 → 90) to left/right position of bubble
-  const bubbleX = ((gamma + 90) / 180) * 192; // 192px container (w-48)
+  // Notify parent component when validity changes
+  useEffect(() => {
+    if (onValidityChange) {
+      onValidityChange(isPitchValid);
+    }
+  }, [isPitchValid, onValidityChange]);
 
   const requestPermissionManually = async () => {
     if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
@@ -93,8 +99,7 @@ export default function LevelIndicator() {
           
           // Start listening
           const handleOrientation = (event: DeviceOrientationEvent) => {
-            if (event.gamma !== null && event.beta !== null) {
-              setGamma(event.gamma);
+            if (event.beta !== null) {
               setBeta(event.beta);
             }
           };
@@ -137,21 +142,32 @@ export default function LevelIndicator() {
 
   return (
     <div className="text-center p-3">
-      <div className={`text-sm font-bold mb-2 ${isLevel ? 'text-green-400' : 'text-white'}`}>
-        {isLevel ? "Level 👍" : "Adjust to level"}
+      <div className={`text-sm font-bold mb-2 ${isPitchValid ? 'text-green-400' : 'text-white'}`}>
+        {isPitchValid ? "Perfect Angle 👍" : "Hold phone upright"}
       </div>
-      <div className="w-48 h-4 bg-white/20 rounded-full mx-auto relative">
-        <div
-          className={`w-4 h-4 rounded-full absolute top-0 transition-all duration-100 ${
-            isLevel ? 'bg-green-400' : 'bg-yellow-400'
-          }`}
-          style={{
-            left: `${bubbleX - 8}px`,
-          }}
-        ></div>
+      
+      {/* Visual pitch indicator */}
+      <div className="flex items-center justify-center gap-3">
+        <div className="text-xs text-white/60">80°</div>
+        <div className="w-32 h-2 bg-white/20 rounded-full relative">
+          {/* Acceptable range highlight */}
+          <div className="absolute top-0 left-0 w-full h-full bg-green-500/30 rounded-full"></div>
+          {/* Current position indicator */}
+          <div
+            className={`w-3 h-3 rounded-full absolute top-1/2 -translate-y-1/2 transition-all duration-100 ${
+              isPitchValid ? 'bg-green-400' : 'bg-yellow-400'
+            }`}
+            style={{
+              left: `${Math.max(0, Math.min(100, ((beta - 80) / 20) * 100))}%`,
+              transform: 'translate(-50%, -50%)'
+            }}
+          ></div>
+        </div>
+        <div className="text-xs text-white/60">100°</div>
       </div>
+      
       <div className="mt-2 text-[10px] text-white/60">
-        <p>Tilt: {gamma.toFixed(1)}° | Pitch: {beta.toFixed(1)}°</p>
+        <p>Pitch: {beta.toFixed(1)}°</p>
       </div>
     </div>
   );
