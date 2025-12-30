@@ -178,11 +178,10 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onPhotoCapture, onCancel,
         {/* Overlay image with opacity - static baseline image based on room type */}
         {overlayImageUrl && (
           <img 
-            src={overlayImageUrl}
-            alt="Baseline comparison overlay" 
-            className="absolute inset-0 opacity-55 pointer-events-none"
-            style={{ objectFit: 'none' }}
-          />
+          src={overlayImageUrl}
+          alt="Baseline comparison overlay" 
+          className="absolute inset-0 w-full h-full object-cover opacity-55 pointer-events-none"
+        />
         )}
 
         {/* Level Indicator */}
