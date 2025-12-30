@@ -180,7 +180,8 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onPhotoCapture, onCancel,
           <img 
             src={overlayImageUrl}
             alt="Baseline comparison overlay" 
-            className="absolute inset-0 w-full h-full object-cover opacity-55 pointer-events-none"
+            className="absolute inset-0 opacity-55 pointer-events-none"
+            style={{ objectFit: 'none' }}
           />
         )}
 
